@@ -1,0 +1,24 @@
+id: rice
+name_vi: Cây lúa
+knowledge_file: knowledge/rice.md
+models:
+  - id: stage
+    type: stage
+    weights: weights/rice/stage_v1.pt
+    imgsz: 800
+    conf: 0.25
+    classes:
+      sinh_truong: { key: vegetative, name_vi: Sinh trưởng }
+      tro_bong:    { key: heading,    name_vi: Trổ bông }
+      chin:        { key: ripening,   name_vi: Chín }
+  - id: disease
+    type: disease
+    weights: weights/rice/disease_v1.pt
+    imgsz: 640
+    conf: 0.25
+    classes:
+      than_vang: { key: false_smut,     name_vi: Than vàng (lúa von) }
+      dao_on:    { key: blast,          name_vi: Đạo ôn }
+      chay_la:   { key: leaf_blight,    name_vi: Cháy lá }
+      dom_van:   { key: sheath_blight,  name_vi: Đốm vằn }
+      dom_nau:   { key: brown_spot,     name_vi: Đốm nâu }

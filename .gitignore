@@ -1,0 +1,8 @@
+weights/
+storage/
+.env
+__pycache__/
+*.pt
+.venv/
+dataset_classify/
+*.zip

@@ -1,0 +1,13 @@
+id: mango
+name_vi: Cây xoài
+knowledge_file: knowledge/mango.md
+models:
+  - id: stage
+    type: stage
+    weights: weights/mango/stage_v1.pt
+    imgsz: 640
+    conf: 0.25
+    classes:
+      sinh_truong:    { key: vegetative,        name_vi: Sinh trưởng }
+      ra_hoa:         { key: flowering,         name_vi: Ra hoa }
+      phat_trien_qua: { key: fruit_development, name_vi: Phát triển quả }

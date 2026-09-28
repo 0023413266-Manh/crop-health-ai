@@ -1,0 +1,14 @@
+id: jackfruit
+name_vi: Cây mít
+knowledge_file: knowledge/jackfruit.md
+models:
+  - id: stage
+    type: stage
+    weights: weights/jackfruit/stage_v1.pt
+    imgsz: 640
+    conf: 0.25
+    classes:
+      mit-con:              { key: seedling,     name_vi: Cây con }
+      mit-sinh-truong:      { key: vegetative,   name_vi: Sinh trưởng }
+      mit-dau-trai:         { key: fruit_set,    name_vi: Đậu trái }
+      mit-trai-truong-thanh: { key: mature_fruit, name_vi: Trái trưởng thành }

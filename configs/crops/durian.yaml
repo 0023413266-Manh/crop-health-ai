@@ -1,0 +1,15 @@
+id: durian
+name_vi: Cây sầu riêng
+knowledge_file: knowledge/durian.md
+models:
+  - id: stage
+    type: stage
+    weights: weights/durian/stage_v1.pt
+    imgsz: 832
+    conf: 0.25
+    classes:
+      sau-rieng-con:               { key: seedling,     name_vi: Cây con }
+      sau-rieng_sinh_truong:       { key: vegetative,   name_vi: Sinh trưởng }
+      sau-rieng-ra-hoa:            { key: flowering,    name_vi: Ra hoa }
+      sau-rieng-dau-trai:          { key: fruit_set,    name_vi: Đậu trái }
+      sau_rieng_qua_truong_thanh:  { key: mature_fruit, name_vi: Quả trưởng thành }

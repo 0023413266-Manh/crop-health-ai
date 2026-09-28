@@ -1,0 +1,15 @@
+id: orange
+name_vi: Cây cam
+knowledge_file: knowledge/orange.md
+models:
+  - id: stage
+    type: stage
+    weights: weights/orange/stage_v1.pt
+    imgsz: 832
+    conf: 0.25
+    classes:
+      cay-con:        { key: seedling,          name_vi: Cây con }
+      sinh-truong:    { key: vegetative,        name_vi: Sinh trưởng }
+      ra-bong:        { key: flowering,         name_vi: Ra bông }
+      phat-trien-qua: { key: fruit_development, name_vi: Phát triển quả }
+      suy-thai-chet:  { key: decline,           name_vi: Suy thoái / chết }

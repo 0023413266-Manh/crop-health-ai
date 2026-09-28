@@ -1,0 +1,14 @@
+id: chili
+name_vi: Cây ớt
+knowledge_file: knowledge/chili.md
+models:
+  - id: stage
+    type: stage
+    weights: weights/chili/stage_v1.pt
+    imgsz: 1024
+    conf: 0.25
+    classes:
+      cay-con:     { key: seedling,   name_vi: Cây con }
+      sinh-truong: { key: vegetative, name_vi: Sinh trưởng }
+      dau-qua:     { key: fruit_set,  name_vi: Đậu quả }
+      qua-chin:    { key: ripe_fruit, name_vi: Quả chín }
