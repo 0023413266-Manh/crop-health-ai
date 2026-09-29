@@ -2,11 +2,12 @@ from pathlib import Path
 import yaml
 from ultralytics import YOLO
 
-ROOT = Path(__file__).resolve().parents[3]  # thư mục crop-health-ai
+# 2 Ebenen nach oben: registry.py -> cropai -> src -> crop-health-ai
+ROOT = Path(__file__).resolve().parents[2]
 
 
 class CropRegistry:
-    """Đọc configs/crops/*.yaml và nạp model khi cần (có cache)."""
+    """Liest configs/crops/*.yaml und lädt Modelle mit Caching."""
 
     def __init__(self, config_dir=None):
         self.config_dir = Path(config_dir) if config_dir else ROOT / "configs" / "crops"
@@ -21,7 +22,7 @@ class CropRegistry:
 
     def get_config(self, crop_id):
         if crop_id not in self.configs:
-            raise ValueError(f"Chưa hỗ trợ cây '{crop_id}'. Có: {list(self.configs)}")
+            raise ValueError(f"Pflanze '{crop_id}' wird nicht unterstützt. Verfügbar: {list(self.configs)}")
         return self.configs[crop_id]
 
     def get_model(self, crop_id, model_id):

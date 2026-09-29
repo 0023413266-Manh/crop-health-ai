@@ -1,0 +1,14 @@
+id: watermelon
+name_vi: Cây dưa hấu
+knowledge_file: knowledge/watermelon.md
+models:
+  - id: stage
+    type: stage
+    weights: weights/watermelon/stage_v1.pt
+    imgsz: 832
+    conf: 0.25
+    classes:
+      cay-con:      { key: seedling,   name_vi: Cây con }
+      sinh-truong:  { key: vegetative, name_vi: Sinh trưởng }
+      dau-trai:     { key: fruit_set,  name_vi: Đậu trái }
+      truong-thanh: { key: mature,     name_vi: Trưởng thành }

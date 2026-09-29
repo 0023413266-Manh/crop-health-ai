@@ -1,3 +1,6 @@
 ultralytics
 pyyaml
 pillow
+google-genai
+python-dotenv
+streamlit

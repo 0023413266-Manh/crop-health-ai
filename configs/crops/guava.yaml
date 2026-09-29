@@ -1,0 +1,13 @@
+id: guava
+name_vi: Cây ổi
+knowledge_file: knowledge/guava.md
+models:
+  - id: stage
+    type: stage
+    weights: weights/guava/stage_v1.pt
+    imgsz: 832
+    conf: 0.25
+    classes:
+      cay-con:     { key: seedling,   name_vi: Cây con }
+      sinh-truong: { key: vegetative, name_vi: Sinh trưởng }
+      cho-trai:    { key: fruit_set,  name_vi: Chờ trái / Đậu trái }

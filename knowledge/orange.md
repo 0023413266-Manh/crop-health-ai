@@ -45,7 +45,7 @@ Tài liệu hướng dẫn nhận diện các giai đoạn sinh trưởng của 
 
 ---
 
-## 4. Phát triển trái (Fruit Development Stage)
+## 4. Phát triển quả (Fruit Development Stage)
 
 * **Đặc điểm nhận diện:**
   * Trái non mới đậu có kích thước bằng hạt đậu, sau đó lớn dần đến kích thước thương phẩm.
