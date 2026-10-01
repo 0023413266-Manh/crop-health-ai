@@ -2,12 +2,13 @@ weights: weights/crop_classifier.pt
 imgsz: 224
 min_conf: 0.7
 classes:
+  banana: banana
   cam: orange
+  dua_hau: watermelon
   lua: rice
   mit: jackfruit
   oi: guava
   ot: chili
+  pitaya: pitaya
   sau_rieng: durian
   xoai: mango
-  dua_hau: watermelon
-  

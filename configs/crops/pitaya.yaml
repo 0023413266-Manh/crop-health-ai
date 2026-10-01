@@ -1,0 +1,14 @@
+id: pitaya
+name_vi: Cây thanh long
+knowledge_file: knowledge/pitaya.md
+models:
+  - id: stage
+    type: stage
+    weights: weights/pitaya/stage_v1.pt
+    imgsz: 640
+    conf: 0.25
+    classes:
+      sinh_truong: { key: vegetative,  name_vi: Thân cành / Sinh trưởng }
+      ra_hoa:      { key: flowering,   name_vi: Nụ / Ra hoa }
+      trai_xanh:   { key: green_fruit,  name_vi: Quả xanh }
+      trai_chin:   { key: ripe_fruit,   name_vi: Quả chín / Thu hoạch }

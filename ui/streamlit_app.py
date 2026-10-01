@@ -85,6 +85,34 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
+def get_stage_knowledge(crop_id: str, detected_stage: str) -> str:
+    """
+    Chỉ trích xuất phần cẩm nang thuộc đúng giai đoạn/bệnh phát hiện được.
+    """
+    md_path = f"knowledge/{crop_id}.md"
+    
+    if not os.path.exists(md_path):
+        return "⚠️ Chưa có dữ liệu cẩm nang cho loại cây này."
+        
+    with open(md_path, 'r', encoding='utf-8') as f:
+        content = f.read()
+    
+    # Cắt file markdown thành từng phần dựa vào tiêu đề '## '
+    sections = content.split('\n## ')
+    
+    # 1. Tìm phần khớp với detected_stage
+    for section in sections:
+        lines = section.strip().split('\n')
+        section_header = lines[0].strip().lower()
+        
+        # So sánh tên thẻ ## với stage phát hiện
+        if detected_stage.lower() in section_header or section_header in detected_stage.lower():
+            return "## " + section
+            
+    # 2. Nếu không tìm thấy chính xác giai đoạn đó -> Trả về phần Giới thiệu chung (Phần đầu file)
+    main_intro = sections[0]
+    return f"ℹ️ *Chưa có hướng dẫn riêng cho giai đoạn '{detected_stage}'. Dưới đây là thông tin chung:*\n\n{main_intro}"
+
 def extract_stage_info(md_text, stage_name):
     """Trích xuất đúng đoạn tài liệu thuộc về giai đoạn, giữ nguyên định dạng gạch đầu dòng."""
     if not stage_name:
@@ -176,17 +204,9 @@ if file:
 
         st.markdown("---")
         
-        # 1. Đọc và LỌC file Markdown
-        kfile = pipe.detector.registry.get_config(res["crop"]).get("knowledge_file")
-        if kfile:
-            kb_path = ROOT / kfile
-            if kb_path.exists():
-                full_md = kb_path.read_text(encoding="utf-8")
-                stage_md = extract_stage_info(full_md, stage_vi) if stage_vi else full_md
-                
-                with st.expander(f"📋 Hướng dẫn kỹ thuật: Giai đoạn {stage_vi or 'Tổng quan'}", expanded=True):
-                    # In Markdown chuẩn xác không bị dồn hàng
-                    st.markdown(stage_md)
+        # 1. Đọc và LỌC file Markdown theo giai đoạn phát hiện được
+       # 1. Đọc và LỌC file Markdown theo giai đoạn phát hiện được
+        
 
         # 2. Gọi AI Tư vấn
         if use_llm:
