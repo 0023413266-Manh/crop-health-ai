@@ -1,6 +1,9 @@
 ultralytics
+opencv-python-headless
 pyyaml
 pillow
+google-generativeai
 google-genai
 python-dotenv
 streamlit
+ollama
