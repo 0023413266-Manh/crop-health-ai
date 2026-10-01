@@ -44,14 +44,21 @@ class GeminiClient:
         # được (local server, không tồn tại trên server Cloud) — cố gọi
         # chỉ tổ tốn thời gian chờ rồi vẫn lỗi, nên bỏ qua thẳng sang
         # thông báo dự phòng thay vì để app "treo" rồi báo lỗi khó hiểu.
-       if self.gemini_model:
-    try:
-        response = self.gemini_model.generate_content(prompt)
-        return response.text
-    except ResourceExhausted:
-        print("⚠️ Gemini hết quota...")
-    except Exception as e:
-        print(f"⚠️ Lỗi kết nối Cloud ({str(e)[:40]})...")
+        if os.getenv("RUN_ENV", "cloud") == "local":
+            try:
+                res = ollama.chat(
+                    model='qwen2.5:1.5b',
+                    messages=[{'role': 'user', 'content': prompt}]
+                )
+                return res['message']['content']
+            except Exception as local_err:
+                print(f"⚠️ Ollama local cũng lỗi: {local_err}")
+ 
+        return (
+            "Không thể kết nối dịch vụ tư vấn AI lúc này. "
+            f"[DEBUG: {getattr(self, '_last_error', 'không rõ')}] "
+            "Khuyến nghị chung: theo dõi ruộng định kỳ, tham khảo cán bộ khuyến nông..."
+        )
  
     def start_chat(self, system_context: str = ""):
         if not self.gemini_model:
