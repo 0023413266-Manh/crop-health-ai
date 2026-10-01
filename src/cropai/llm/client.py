@@ -14,7 +14,7 @@ class GeminiClient:
         # gemini-2.5-flash ĐÃ BỊ GOOGLE NGỪNG HỖ TRỢ (retired giữa 2026).
         # Dùng gemini-3.5-flash-lite làm mặc định — 500 lượt/ngày (so với
         # 20 lượt/ngày của bản flash thường), phù hợp hơn cho demo liên tục.
-        gemini_model_name = gemini_model_name or os.getenv("GEMINI_MODEL", "gemini-3.5-flash-lite")
+        gemini_model_name = gemini_model_name or os.getenv("GEMINI_MODEL", "gemini-3.8-flash-lite")
         api_key = os.getenv("GEMINI_API_KEY")
  
         # --- DÒNG DEBUG TẠM THỜI — XÓA SAU KHI XÁC NHẬN XONG ---
@@ -44,22 +44,14 @@ class GeminiClient:
         # được (local server, không tồn tại trên server Cloud) — cố gọi
         # chỉ tổ tốn thời gian chờ rồi vẫn lỗi, nên bỏ qua thẳng sang
         # thông báo dự phòng thay vì để app "treo" rồi báo lỗi khó hiểu.
-        if os.getenv("RUN_ENV", "cloud") == "local":
-            try:
-                res = ollama.chat(
-                    model='qwen2.5:1.5b',
-                    messages=[{'role': 'user', 'content': prompt}]
-                )
-                return res['message']['content']
-            except Exception as local_err:
-                print(f"⚠️ Ollama local cũng lỗi: {local_err}")
- 
-        return (
-            "Không thể kết nối dịch vụ tư vấn AI lúc này (hết quota hoặc "
-            "lỗi kết nối). Đây là khuyến nghị chung: theo dõi ruộng định kỳ, "
-            "tham khảo cán bộ khuyến nông địa phương nếu phát hiện dấu hiệu "
-            "bất thường."
-        )
+       if self.gemini_model:
+    try:
+        response = self.gemini_model.generate_content(prompt)
+        return response.text
+    except ResourceExhausted:
+        print("⚠️ Gemini hết quota...")
+    except Exception as e:
+        print(f"⚠️ Lỗi kết nối Cloud ({str(e)[:40]})...")
  
     def start_chat(self, system_context: str = ""):
         if not self.gemini_model:
