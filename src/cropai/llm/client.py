@@ -16,6 +16,13 @@ class GeminiClient:
         # 20 lượt/ngày của bản flash thường), phù hợp hơn cho demo liên tục.
         gemini_model_name = gemini_model_name or os.getenv("GEMINI_MODEL", "gemini-3.5-flash-lite")
         api_key = os.getenv("GEMINI_API_KEY")
+ 
+        # --- DÒNG DEBUG TẠM THỜI — XÓA SAU KHI XÁC NHẬN XONG ---
+        import streamlit as st
+        st.write("Debug - có GEMINI_API_KEY không:", bool(api_key))
+        st.write("Debug - model đang dùng:", gemini_model_name)
+        # --- HẾT DÒNG DEBUG ---
+ 
         if api_key:
             genai.configure(api_key=api_key)
             self.gemini_model = genai.GenerativeModel(gemini_model_name)
