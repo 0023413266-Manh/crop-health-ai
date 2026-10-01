@@ -1,5 +1,5 @@
 opencv-python-headless
-ultralytics
+ultralytics --no-deps
 pyyaml
 pillow
 google-generativeai
@@ -7,3 +7,5 @@ google-genai
 python-dotenv
 streamlit
 ollama
+torch
+torchvision
