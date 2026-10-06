@@ -1,0 +1,15 @@
+id: coconut
+name_vi: Cây dừa
+knowledge_file: knowledge/coconut.md
+models:
+  - id: stage
+    type: stage
+    weights: weights/coconut/stage_v1.pt
+    imgsz: 640
+    conf: 0.35
+    classes:
+      1_cay_con:           { key: seedling,             name_vi: Cây con }
+      2_sinh_truong:       { key: vegetative,           name_vi: Sinh trưởng }
+      3_ra_hoa_dau_trai:   { key: flowering_fruiting,   name_vi: Ra hoa và Đậu trái }
+      4_trai_truong_thanh: { key: mature_fruit,         name_vi: Trái trưởng thành (Dừa tươi) }
+      5_trai_kho:          { key: dry_fruit,            name_vi: Trái khô (Dừa khô) }

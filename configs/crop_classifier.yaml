@@ -4,6 +4,8 @@ min_conf: 0.7
 classes:
   banana: banana
   cam: orange
+  du_du: papaya      # Thêm đu đủ (map với id: papaya trong papaya.yaml)
+  dua: coconut       # Thêm dừa (map với id: coconut trong coconut.yaml)
   dua_hau: watermelon
   lua: rice
   mit: jackfruit

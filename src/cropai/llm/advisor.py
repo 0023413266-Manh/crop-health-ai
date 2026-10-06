@@ -59,9 +59,11 @@ Từ giờ, người dùng có thể hỏi thêm. Luôn trả lời dựa trên 
     def start_session(self, result, knowledge_file=None):
         """Tạo 'phiên hỏi đáp' tự quản lý lịch sử, có fallback Ollama nếu Gemini lỗi."""
         context = self._build_context(result, knowledge_file)
-        first_question = ("Hãy viết lời tư vấn ban đầu, gồm: (1) nhận định tình trạng, "
-                           "(2) cách chăm sóc giai đoạn này, (3) sâu bệnh cần theo dõi, "
-                           "(4) chuẩn bị cho giai đoạn kế tiếp.")
+        first_question = ("Hãy viết lời tư vấn, với yêu cầu: KHÔNG lặp lại thông tin hiển nhiên mà người trồng tự nhìn ảnh đã biết (ví dụ không cần mô tả lại 'đây là quả ổi xanh')."
+                        "Thay vào đó, tập trung vào:"
+                        "(1) Đây có phải THỜI ĐIỂM QUAN TRỌNG cần hành động ngay không (ví dụ: sắp tới hạn bón phân, đây là giai đoạn dễ bị sâu bệnh tấn công nhất trong cả vòng đời, sắp đến lúc phải ngừng phun thuốc để đảm bảo an toàn thu hoạch)."
+                        "(2) Rủi ro CỤ THỂ dễ bị bỏ qua ở giai đoạn này mà người mới trồng hay mắc phải."
+                        "(3) Một việc CẦN LÀM TRONG TUẦN TỚI, không phải lời khuyên chung chung theo kiểu sách giáo khoa.")
 
         session = ChatSession(self.client, context)
         first = session.ask(first_question)

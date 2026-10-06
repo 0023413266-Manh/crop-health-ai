@@ -1,0 +1,14 @@
+id: papaya
+name_vi: Cây đu đủ
+knowledge_file: knowledge/papaya.md
+models:
+  - id: stage
+    type: stage
+    weights: weights/papaya/stage_v1.pt  # ⚠️ Đảm bảo đã chép file best.pt mới vào đây
+    imgsz: 640                           # Đổi từ 832 về 640 cho đúng chuẩn lúc train
+    conf: 0.25                         # Để 0.20 để tăng độ nhạy bắt chùm hoa
+    classes:
+      sinh-truong: { key: vegetative,     name_vi: Sinh trưởng }
+      ra-hoa:      { key: flowering,      name_vi: Ra hoa }
+      trai-xanh:   { key: fruit_green,    name_vi: Trái xanh }
+      trai-chin:   { key: fruit_ripe,     name_vi: Trái chín }
