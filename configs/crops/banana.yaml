@@ -8,7 +8,7 @@ models:
     imgsz: 640
     conf: 0.25
     classes:
+      sinh_truong:   { key: vegetative,    name_vi: Thân lá / Sinh trưởng }
+      trobuon-rahoa: { key: flowering,     name_vi: Trổ buồng / Ra hoa }
       buong_xanh:    { key: green_bunch,   name_vi: Buồng quả xanh }
       chin:          { key: ripe_bunch,    name_vi: Buồng/Quả chín }
-      trobuon-rahoa: { key: flowering,     name_vi: Trổ buồng / Ra hoa }
-      sinh_truong:   { key: vegetative,    name_vi: Thân lá / Sinh trưởng }

@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spotlight Selector</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            background: transparent;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            color: #2e7d32;
+            overflow: hidden;
+        }
+
+        #app {
+            width: 100%;
+            max-width: 580px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        #canvas-container {
+            width: 100%;
+            max-width: 580px;
+            position: relative;
+            background: #1a1a1a;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+            cursor: crosshair;
+            touch-action: none;
+        }
+
+        #canvas {
+            display: block;
+            width: 100%;
+            height: auto;
+            user-select: none;
+        }
+
+        #hint {
+            width: 100%;
+            max-width: 580px;
+            margin-top: 8px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            background: #f1f8f3;
+            color: #274d2b;
+            text-align: center;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        #toolbar {
+            width: 100%;
+            max-width: 580px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            margin-top: 8px;
+            padding: 2px 4px;
+        }
+
+        #count {
+            color: #1b5e20;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        button {
+            border: 1px solid #c8e6c9;
+            background: #ffffff;
+            color: #2e7d32;
+            border-radius: 8px;
+            padding: 6px 12px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        button:hover {
+            background: #e8f5e9;
+            border-color: #81c784;
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+    </style>
+</head>
+<body>
+
+<div id="app">
+    <div id="canvas-container">
+        <canvas id="canvas"></canvas>
+    </div>
+
+    <div id="hint">
+        💡 <b>Hướng dẫn:</b> Di chuột để xem vùng sáng · Click để cố định vùng · Kéo góc để thay đổi kích thước · Click vùng khác để tạo thêm vùng mới
+    </div>
+
+    <div id="toolbar">
+        <div id="count">0 vùng đã chọn</div>
+        <div class="actions">
+            <button id="btn-delete" title="Xóa vùng đang chọn">🗑️ Xóa vùng</button>
+            <button id="btn-clear" title="Xóa tất cả các vùng đã chọn">↩️ Xóa tất cả</button>
+        </div>
+    </div>
+</div>
+
+<script>
+/* ==========================================================================
+   Zero-dependency Streamlit Component Protocol
+   ========================================================================== */
+const Streamlit = {
+    API_VERSION: 1,
+    RENDER_EVENT: "streamlit:render",
+    events: new EventTarget(),
+    registeredMessageListener: false,
+    lastFrameHeight: 0,
+
+    setComponentReady: function() {
+        if (!this.registeredMessageListener) {
+            window.addEventListener("message", this.onMessageEvent.bind(this));
+            this.registeredMessageListener = true;
+        }
+        this.sendBackMsg("streamlit:componentReady", { apiVersion: this.API_VERSION });
+    },
+
+    setFrameHeight: function(height) {
+        if (height === undefined) {
+            height = document.body.scrollHeight;
+        }
+        if (height === this.lastFrameHeight) return;
+        this.lastFrameHeight = height;
+        this.sendBackMsg("streamlit:setFrameHeight", { height: height });
+    },
+
+    setComponentValue: function(value) {
+        this.sendBackMsg("streamlit:setComponentValue", { value: value, dataType: "json" });
+    },
+
+    onMessageEvent: function(event) {
+        if (event.data && event.data.type === this.RENDER_EVENT) {
+            const detail = {
+                disabled: Boolean(event.data.disabled),
+                args: event.data.args || {},
+                theme: event.data.theme
+            };
+            this.events.dispatchEvent(new CustomEvent(this.RENDER_EVENT, { detail: detail }));
+        }
+    },
+
+    sendBackMsg: function(type, data) {
+        window.parent.postMessage(Object.assign({ isStreamlitMessage: true, type: type }, data), "*");
+    }
+};
+
+/* ==========================================================================
+   Canvas & State Setup
+   ========================================================================== */
+const canvas = document.getElementById("canvas");
+const container = document.getElementById("canvas-container");
+const ctx = canvas.getContext("2d");
+const countText = document.getElementById("count");
+const btnDelete = document.getElementById("btn-delete");
+const btnClear = document.getElementById("btn-clear");
+
+const image = new Image();
+let imageLoaded = false;
+let currentImageUrl = null;
+
+// JS-owned state — NEVER overwritten by Streamlit render while interacting
+let regions = [];
+let activeIndex = -1;
+let preview = null;
+let drag = null;
+
+// Guards to prevent stale render from overwriting fresh JS state
+let ignoreNextRender = false;   // skip ONE render cycle after we push a value
+let lastSentJson = "";           // deduplicate: don't send same state twice
+
+function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+
+/* -----------------------------------------------------------------------
+   sendValue — ONLY called on mouseup / button click (never during drag)
+   ----------------------------------------------------------------------- */
+function sendValue(action) {
+    const payload = {
+        regions: regions,
+        active_index: activeIndex,
+        active: (activeIndex >= 0 && activeIndex < regions.length) ? regions[activeIndex] : null,
+        action: action || "change"
+    };
+    const json = JSON.stringify(payload);
+
+    // Skip if nothing actually changed (Streamlit rerun loops can call render many times)
+    if (json === lastSentJson && action !== "clear" && action !== "delete" && action !== "add") {
+        return;
+    }
+    lastSentJson = json;
+
+    // Tell onRender to skip the very next render so it won't clobber our fresh state
+    ignoreNextRender = true;
+
+    Streamlit.setComponentValue(payload);
+}
+
+function updateCount() {
+    countText.innerText = regions.length + " vùng đã chọn" +
+        (activeIndex >= 0 ? " (Đang chọn vùng #" + (activeIndex + 1) + ")" : "");
+}
+
+/* ==========================================================================
+   Canvas Size Management
+   ========================================================================== */
+function resizeCanvas() {
+    if (!imageLoaded || !image.naturalWidth) return;
+
+    const containerW = container.clientWidth || window.innerWidth || 580;
+    const maxWidth = Math.max(280, Math.min(containerW, 580));
+    const ratio = image.naturalHeight / image.naturalWidth;
+
+    canvas.width = Math.round(maxWidth);
+    canvas.height = Math.round(maxWidth * ratio);
+
+    draw();
+
+    const totalHeight = canvas.height + 95;
+    Streamlit.setFrameHeight(totalHeight);
+}
+
+/* ==========================================================================
+   Drawing Logic
+   ========================================================================== */
+function draw() {
+    if (!imageLoaded || !canvas.width || !canvas.height) return;
+
+    const W = canvas.width;
+    const H = canvas.height;
+
+    ctx.clearRect(0, 0, W, H);
+    ctx.drawImage(image, 0, 0, W, H);
+
+    // Soft darkening overlay
+    ctx.fillStyle = "rgba(0, 0, 0, 0.48)";
+    ctx.fillRect(0, 0, W, H);
+
+    // Mouse hover preview spotlight
+    if (preview && !drag) {
+        drawBrightRegion(preview, false, true);
+    }
+
+    // All fixed regions
+    regions.forEach(function(region, index) {
+        drawBrightRegion(region, index === activeIndex, false);
+    });
+}
+
+function drawBrightRegion(region, isActive, isPreview) {
+    const x = region.x * canvas.width;
+    const y = region.y * canvas.height;
+    const w = region.w * canvas.width;
+    const h = region.h * canvas.height;
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(x, y, w, h);
+    ctx.clip();
+    ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+    ctx.restore();
+
+    ctx.save();
+    if (isActive) {
+        ctx.strokeStyle = "#00e676";
+        ctx.lineWidth = 3;
+        ctx.setLineDash([]);
+    } else if (isPreview) {
+        ctx.strokeStyle = "#ffffff";
+        ctx.lineWidth = 2;
+        ctx.setLineDash([5, 5]);
+    } else {
+        ctx.strokeStyle = "#ffffff";
+        ctx.lineWidth = 2;
+        ctx.setLineDash([]);
+    }
+    ctx.strokeRect(x, y, w, h);
+
+    if (isActive) {
+        drawHandle(x, y);
+        drawHandle(x + w, y);
+        drawHandle(x, y + h);
+        drawHandle(x + w, y + h);
+    }
+    ctx.restore();
+}
+
+function drawHandle(x, y) {
+    const size = 11;
+    ctx.fillStyle = "#ffffff";
+    ctx.strokeStyle = "#1b5e20";
+    ctx.lineWidth = 2.5;
+    ctx.fillRect(x - size / 2, y - size / 2, size, size);
+    ctx.strokeRect(x - size / 2, y - size / 2, size, size);
+}
+
+/* ==========================================================================
+   Hit Testing & Coordinates
+   ========================================================================== */
+function getMouse(event) {
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+
+    const px = (event.clientX - rect.left) * scaleX;
+    const py = (event.clientY - rect.top) * scaleY;
+
+    return {
+        px: px,
+        py: py,
+        x: clamp(px / canvas.width, 0, 1),
+        y: clamp(py / canvas.height, 0, 1)
+    };
+}
+
+function toPixel(region) {
+    return {
+        x: region.x * canvas.width,
+        y: region.y * canvas.height,
+        w: region.w * canvas.width,
+        h: region.h * canvas.height
+    };
+}
+
+function hitRegion(x, y) {
+    const handleSize = 18;
+
+    // Check resize handles on active region first
+    if (activeIndex >= 0 && activeIndex < regions.length) {
+        const r = toPixel(regions[activeIndex]);
+
+        if (Math.abs(x - r.x) < handleSize && Math.abs(y - r.y) < handleSize)
+            return { type: "resize", handle: "nw", index: activeIndex };
+        if (Math.abs(x - (r.x + r.w)) < handleSize && Math.abs(y - r.y) < handleSize)
+            return { type: "resize", handle: "ne", index: activeIndex };
+        if (Math.abs(x - r.x) < handleSize && Math.abs(y - (r.y + r.h)) < handleSize)
+            return { type: "resize", handle: "sw", index: activeIndex };
+        if (Math.abs(x - (r.x + r.w)) < handleSize && Math.abs(y - (r.y + r.h)) < handleSize)
+            return { type: "resize", handle: "se", index: activeIndex };
+    }
+
+    // Check region interiors (reverse order = top-most first)
+    for (let i = regions.length - 1; i >= 0; i--) {
+        const r = toPixel(regions[i]);
+        if (x >= r.x && x <= r.x + r.w && y >= r.y && y <= r.y + r.h)
+            return { type: "move", index: i };
+    }
+
+    return null;
+}
+
+function createRegion(cx, cy) {
+    const minDim = Math.min(canvas.width, canvas.height);
+    const sidePx = minDim * 0.25;
+    const w = sidePx / canvas.width;
+    const h = sidePx / canvas.height;
+
+    return {
+        x: clamp(cx - w / 2, 0, 1 - w),
+        y: clamp(cy - h / 2, 0, 1 - h),
+        w: w,
+        h: h
+    };
+}
+
+/* ==========================================================================
+   Pointer Event Listeners
+   ========================================================================== */
+canvas.addEventListener("pointermove", function(event) {
+    const mouse = getMouse(event);
+
+    if (drag) {
+        // During drag: update visuals only, NO setComponentValue
+        handleDrag(mouse);
+        return;
+    }
+
+    const hit = hitRegion(mouse.px, mouse.py);
+
+    if (hit) {
+        preview = null;
+        if (hit.type === "resize") {
+            canvas.style.cursor = (hit.handle === "nw" || hit.handle === "se") ? "nwse-resize" : "nesw-resize";
+        } else {
+            canvas.style.cursor = "move";
+        }
+    } else {
+        canvas.style.cursor = "crosshair";
+        preview = createRegion(mouse.x, mouse.y);
+    }
+
+    draw();
+});
+
+canvas.addEventListener("pointerleave", function() {
+    if (!drag) {
+        preview = null;
+        draw();
+    }
+});
+
+canvas.addEventListener("pointerdown", function(event) {
+    event.preventDefault();
+    canvas.setPointerCapture(event.pointerId);   // keep events even if pointer leaves canvas
+
+    const mouse = getMouse(event);
+    const hit = hitRegion(mouse.px, mouse.py);
+
+    if (hit) {
+        // Start dragging existing region — do NOT call sendValue yet
+        activeIndex = hit.index;
+        drag = {
+            type: hit.type,
+            handle: hit.handle,
+            index: hit.index,
+            startX: mouse.x,
+            startY: mouse.y,
+            original: { ...regions[hit.index] }
+        };
+        preview = null;
+        draw();
+        updateCount();
+        return;
+    }
+
+    // Click on empty space: place new region immediately
+    const newReg = createRegion(mouse.x, mouse.y);
+    regions.push(newReg);
+    activeIndex = regions.length - 1;
+    preview = null;
+
+    draw();
+    updateCount();
+    // Send immediately for new region (single click, no drag involved)
+    sendValue("add");
+});
+
+function handleDrag(mouse) {
+    if (!drag) return;
+
+    const idx = drag.index;
+    const orig = drag.original;
+    const dx = mouse.x - drag.startX;
+    const dy = mouse.y - drag.startY;
+
+    if (drag.type === "move") {
+        regions[idx] = {
+            x: clamp(orig.x + dx, 0, 1 - orig.w),
+            y: clamp(orig.y + dy, 0, 1 - orig.h),
+            w: orig.w,
+            h: orig.h
+        };
+    } else if (drag.type === "resize") {
+        const minSize = 0.04;
+        let x = orig.x, y = orig.y, w = orig.w, h = orig.h;
+
+        if (drag.handle === "nw") {
+            const newX = clamp(orig.x + dx, 0, orig.x + orig.w - minSize);
+            const newY = clamp(orig.y + dy, 0, orig.y + orig.h - minSize);
+            x = newX; y = newY;
+            w = orig.x + orig.w - newX;
+            h = orig.y + orig.h - newY;
+        } else if (drag.handle === "ne") {
+            const newY = clamp(orig.y + dy, 0, orig.y + orig.h - minSize);
+            y = newY;
+            h = orig.y + orig.h - newY;
+            w = clamp(orig.w + dx, minSize, 1 - orig.x);
+        } else if (drag.handle === "sw") {
+            const newX = clamp(orig.x + dx, 0, orig.x + orig.w - minSize);
+            x = newX;
+            w = orig.x + orig.w - newX;
+            h = clamp(orig.h + dy, minSize, 1 - orig.y);
+        } else if (drag.handle === "se") {
+            w = clamp(orig.w + dx, minSize, 1 - orig.x);
+            h = clamp(orig.h + dy, minSize, 1 - orig.y);
+        }
+
+        regions[idx] = { x, y, w, h };
+    }
+
+    // Visual update only — no postMessage during drag
+    draw();
+}
+
+// ✅ pointerup on WINDOW catches release even outside canvas
+window.addEventListener("pointerup", function() {
+    if (drag) {
+        drag = null;
+        updateCount();
+        // Only NOW push the final position to Streamlit
+        sendValue("change");
+    }
+});
+
+/* ==========================================================================
+   Toolbar Buttons
+   ========================================================================== */
+btnDelete.addEventListener("click", function() {
+    if (activeIndex >= 0 && activeIndex < regions.length) {
+        regions.splice(activeIndex, 1);
+        activeIndex = regions.length ? Math.min(activeIndex, regions.length - 1) : -1;
+        draw();
+        updateCount();
+        sendValue("delete");
+    }
+});
+
+btnClear.addEventListener("click", function() {
+    regions = [];
+    activeIndex = -1;
+    preview = null;
+    lastSentJson = "";   // force resend even if both sides had empty
+    draw();
+    updateCount();
+    sendValue("clear");
+});
+
+/* ==========================================================================
+   Streamlit RENDER handler
+   KEY FIX: we ONLY sync state from Streamlit when we haven't just sent a
+   fresh value ourselves (ignoreNextRender guard).
+   ========================================================================== */
+function onRender(event) {
+    const args = event.detail.args;
+    if (!args) return;
+
+    // Load (or reload) image when URL changes
+    if (args.image_url && args.image_url !== currentImageUrl) {
+        currentImageUrl = args.image_url;
+        imageLoaded = false;
+
+        image.onload = function() {
+            imageLoaded = true;
+            resizeCanvas();
+        };
+        image.onerror = function() {
+            console.error("Không thể tải ảnh cho spotlight selector");
+        };
+        image.src = args.image_url;
+
+        if (image.complete && image.naturalWidth > 0) {
+            imageLoaded = true;
+            resizeCanvas();
+        }
+    }
+
+    // -----------------------------------------------------------------------
+    // CRITICAL: Skip state-sync from Python if:
+    //   a) JS is mid-drag, OR
+    //   b) We just sent a value (ignoreNextRender) — consume the flag
+    // -----------------------------------------------------------------------
+    if (drag) {
+        // Always skip during drag
+    } else if (ignoreNextRender) {
+        // Consume the skip-flag; keep JS state as-is
+        ignoreNextRender = false;
+    } else {
+        // Safe to accept Python state (e.g. first load, or external clear)
+        if (Array.isArray(args.regions)) {
+            regions = args.regions;
+        }
+        if (typeof args.active_index === "number") {
+            activeIndex = args.active_index;
+        }
+    }
+
+    updateCount();
+    if (imageLoaded) {
+        draw();
+    }
+}
+
+Streamlit.events.addEventListener(Streamlit.RENDER_EVENT, onRender);
+Streamlit.setComponentReady();
+Streamlit.setFrameHeight(550);
+
+window.addEventListener("resize", function() {
+    if (imageLoaded) resizeCanvas();
+});
+</script>
+</body>
+</html>

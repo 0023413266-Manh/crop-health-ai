@@ -1,0 +1,9 @@
+{
+  "venvPath": ".",
+  "extraPaths": [
+    "./src",
+    "./ui"
+  ],
+  "reportMissingImports": "none",
+  "reportMissingModuleSource": "none"
+}

@@ -1,0 +1,144 @@
+{
+  "id": "conv_20261007_134813_f7ce6e",
+  "title": "cc",
+  "created_at": "2026-10-07T13:48:13",
+  "updated_at": "2026-10-07T16:33:59",
+  "messages": [
+    {
+      "role": "assistant",
+      "content": "Nếu quả đu đủ trong hình ảnh đã không phát hiện bệnh, đây có thể là thời điểm quan trọng mà nông dân cần lưu ý:\n\n1. **Giai đoạn dễ bị sâu bệnh tấn công:** Cây đu đủ có thể gặp rủi ro từ 6 tháng trước đến 18 tháng sau khi thụ phấn. Đây là thời điểm cơ thể cây bắt đầu hình thành trái và là giai đoạn mà nhiều loại sâu bệnh, bao gồm sâu hại và vi khuẩn, có thể tấn công.\n\n2. **Rủi ro dễ bị bỏ qua:** Cây đu đủ vẫn có thể gặp rủi ro từ việc thiếu tưới nước hoặc phân bón hợp lý. Nếu nông dân không tuân thủ các quy tắc về cách ly an toàn để tránh các tác nhân bên ngoài ảnh hưởng đến trái đu đủ, có thể khiến quả bị hỏng hoặc không đạt chất lượng tốt.\n\n3. **Động tác cần thực hiện ngay lập tức:**  \n   - **Tưới nước:** Giảm lượng nước tưới từ 10-15 ngày trước khi thu hoạch để trái ngọt hơn, tránh bị nhạt thịt và nứt vỏ.\n   - **Phân bón:** Ngưng bón phân hóa học ở giai đoạn này để đảm bảo thời gian cách ly an toàn.\n   - **Thu hoạch:** Hái khi trái có 2-3 sọc vàng. Cắt sát cuống, đặt nhẹ nhàng tránh bầm dập vì da trái đu đủ chín rất mỏng.\n   \nLưu ý: Cây đu đủ có thể gặp rủi ro từ 6 tháng trước đến 18 tháng sau khi thụ phấn. Việc tuân thủ các quy tắc về cách ly an toàn để tránh các tác nhân bên ngoài ảnh hưởng đến trái đu đủ, có thể giúp bảo vệ quả đu đủ khỏi bệnh tật và đảm bảo chất lượng tốt hơn."
+    }
+  ],
+  "analyses": [
+    {
+      "id": "ana_1791358567_6721",
+      "image_path": "C:\\Users\\VICTUS\\Documents\\Downloads\\crop-health-ai\\history\\conv_20261007_134813_f7ce6e\\images\\ana_1791358567_6721.jpg",
+      "source_image_path": "C:\\Users\\VICTUS\\Documents\\Downloads\\crop-health-ai\\history\\conv_20261007_134813_f7ce6e\\images\\ana_1791358567_6721_original.jpg",
+      "crop": "banana",
+      "crop_name": "Cây chuối",
+      "stage": "Trổ buồng / Ra hoa",
+      "stage_obj": {
+        "key": "flowering",
+        "name_vi": "Trổ buồng / Ra hoa"
+      },
+      "confidence": 1.0,
+      "detections": [
+        {
+          "model_type": "stage",
+          "raw_class": "trobuon-rahoa",
+          "key": "flowering",
+          "name_vi": "Trổ buồng / Ra hoa",
+          "conf": 0.473,
+          "box": [
+            195.9,
+            126.0,
+            429.3,
+            354.8
+          ]
+        }
+      ],
+      "diseases": [],
+      "created_at": "2026-10-07T14:36:07"
+    },
+    {
+      "id": "ana_1791358568_802f",
+      "image_path": "C:\\Users\\VICTUS\\Documents\\Downloads\\crop-health-ai\\history\\conv_20261007_134813_f7ce6e\\images\\ana_1791358568_802f.jpg",
+      "source_image_path": "C:\\Users\\VICTUS\\Documents\\Downloads\\crop-health-ai\\history\\conv_20261007_134813_f7ce6e\\images\\ana_1791358568_802f_original.jpg",
+      "crop": "papaya",
+      "crop_name": "Cây đu đủ",
+      "stage": "Ra hoa",
+      "stage_obj": {
+        "key": "flowering",
+        "name_vi": "Ra hoa"
+      },
+      "confidence": 0.998,
+      "detections": [
+        {
+          "model_type": "stage",
+          "raw_class": "ra-hoa",
+          "key": "flowering",
+          "name_vi": "Ra hoa",
+          "conf": 0.77,
+          "box": [
+            31.3,
+            68.6,
+            507.0,
+            391.2
+          ]
+        }
+      ],
+      "diseases": [],
+      "created_at": "2026-10-07T14:36:08"
+    },
+    {
+      "id": "ana_1791365632_5418",
+      "image_path": "C:\\Users\\VICTUS\\Documents\\Downloads\\crop-health-ai\\history\\conv_20261007_134813_f7ce6e\\images\\ana_1791365632_5418.jpg",
+      "source_image_path": "C:\\Users\\VICTUS\\Documents\\Downloads\\crop-health-ai\\history\\conv_20261007_134813_f7ce6e\\images\\ana_1791365632_5418_original.jpg",
+      "crop": "papaya",
+      "crop_name": "Cây đu đủ",
+      "stage": "Trái chín",
+      "stage_obj": {
+        "key": "fruit_ripe",
+        "name_vi": "Trái chín"
+      },
+      "confidence": 1.0,
+      "detections": [
+        {
+          "model_type": "stage",
+          "raw_class": "trai-chin",
+          "key": "fruit_ripe",
+          "name_vi": "Trái chín",
+          "conf": 0.944,
+          "box": [
+            247.6,
+            58.6,
+            371.5,
+            180.9
+          ]
+        },
+        {
+          "model_type": "stage",
+          "raw_class": "trai-chin",
+          "key": "fruit_ripe",
+          "name_vi": "Trái chín",
+          "conf": 0.81,
+          "box": [
+            344.0,
+            158.8,
+            479.2,
+            316.0
+          ]
+        },
+        {
+          "model_type": "stage",
+          "raw_class": "trai-chin",
+          "key": "fruit_ripe",
+          "name_vi": "Trái chín",
+          "conf": 0.74,
+          "box": [
+            219.8,
+            228.1,
+            274.3,
+            315.9
+          ]
+        },
+        {
+          "model_type": "stage",
+          "raw_class": "trai-chin",
+          "key": "fruit_ripe",
+          "name_vi": "Trái chín",
+          "conf": 0.325,
+          "box": [
+            142.5,
+            79.4,
+            272.7,
+            204.1
+          ]
+        }
+      ],
+      "diseases": [],
+      "created_at": "2026-10-07T16:33:52"
+    }
+  ],
+  "context": ""
+}

@@ -69,6 +69,18 @@ Từ giờ, người dùng có thể hỏi thêm. Luôn trả lời dựa trên 
         first = session.ask(first_question)
         return session, first
 
+    def resume_session(self, context: str, history: list):
+        """
+        Dựng lại ChatSession từ dữ liệu đã lưu trong DB.
+        Không gọi lại Gemini, chỉ khôi phục context và history.
+        history: list of (role, text) tuples như đã lưu trong history_json.
+        Trả về ChatSession đã có sẵn lịch sử.
+        """
+        session = ChatSession(self.client, context)
+        # Khôi phục lịch sử dạng list of [role, text] hoặc (role, text)
+        session.history = [tuple(item) for item in history]
+        return session
+
 
 class ChatSession:
     """Giữ lịch sử hội thoại thủ công, mỗi câu hỏi gọi qua GeminiClient.generate()

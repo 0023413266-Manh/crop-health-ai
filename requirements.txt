@@ -7,3 +7,6 @@ google-genai
 python-dotenv
 streamlit
 ollama
+streamlit-cropper
+pandas
+numpy
